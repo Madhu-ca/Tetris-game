@@ -1,0 +1,388 @@
+Steps to create Tetris game
+
+a.create html code
+	a.h2 heading element to display score
+		<h2> Score: 0 </h2>
+
+	b.canvas element to draw graphics on a web page.
+		- graphics may be gradient color, multicolor shape/text etc
+-The HTML5 Canvas element is an HTML tag similar to the <div>, <a>, or 
+<table> tag, with the exception that its contents are rendered with JavaScript. 
+
+		 <canvas id="tetris" height="600" width="300" ></canvas>
+
+===================================
+
+b.create css code
+	*{
+		margin : 0;
+    		padding :0;
+    		box-sizing : border-box;
+	}
+
+	body{
+    		background-color: lightcoral;
+    		display: flex;
+   	 	align-items: center;
+    		justify-content: space-evenly;
+    		flex-direction: column;
+    		height: 98vh;
+    		color: white;
+	}
+
+	#tetris{
+    		background-color: whitesmoke;
+    		box-shadow: 0 0 10px 0 lightgrey;
+	}
+
+=================================
+
+c.create js code
+
+	1.create a CANVAS
+		let canvas = document.querySelector("#tetris");
+- In order to leverage the HTML5 Canvas, we'll need to place the canvas tag 
+somewhere inside the HTML document, access the canvas tag with JavaScript, 
+create a context, and then utilize the HTML5 Canvas API to draw visualizations.
+------------------------
+
+	2.create a scoreboard
+		let scoreboard = document.querySelector("h2");
+---------------------------
+
+	3.let ctx = canvas.getContext("2d");
+
+		- here context means background to playing up an event
+
+- The canvas element is the actual DOM node that's embedded in the HTML page.
+ 
+- The canvas context is an object with properties and methods that you can use to 
+render graphics inside the canvas element. The context can be 2d or webgl (3d). 
+Each canvas element can only have one context.
+
+- This function takes one parameter, the type of context 2d.
+- refer:https://www.html5canvastutorials.com/tutorials/html5-canvas-element/#:~:text=The%20canvas%20element%20is%20the,can%20only%20have%20one%20context.
+
+------------------------------
+
+	4. ctx.scale(30,30);
+
+		- The scale() is a method of the 2D drawing context. 
+- The scale() method scales the current drawing, bigger or smaller.
+The scale() method adds a scaling transformation to the canvas units horizontally 
+and/or vertically.
+		-The default unit on the canvas is one pixel. The scaling transformation 
+changes this default.
+For example, a scaling factor of 0.5 will change the unit size to 0.5 pixels. Similarly, 
+a scaling factor of 2 will increase the unit size to two pixels.
+		-When the unit size is scaled, shapes are also drawn at the new units.
+
+context.scale(scalewidth,scaleheight);
+	ctx.scale(30,30);
+		- 30 px far from the left and 30 px far from top of the canvas 
+
+-----------------------------
+
+	5.create different shapes for different blocks
+		-for this create array group 
+	const SHAPES = [
+    [
+        [0,1,0,0],
+        [0,1,0,0],
+        [0,1,0,0],
+        [0,1,0,0]
+    ],
+    [
+        [0,1,0],  
+        [0,1,0],  
+        [1,1,0]   
+    ],
+    [
+        [0,1,0],
+        [0,1,0],
+        [0,1,1]
+    ],
+    [
+        [1,1,0],
+        [0,1,1],
+        [0,0,0]
+    ],
+    [
+        [0,1,1],
+        [1,1,0],
+        [0,0,0]
+    ],
+    [
+        [1,1,1],
+        [0,1,0],
+        [0,0,0]
+    ],
+    [
+        [1,1],
+        [1,1],
+    ]
+]
+
+-------------------------
+
+	6.create different colours for different blocks
+
+	const COLORS = [
+    		"#fff",
+    		"#9b5fe0",
+   		 "#16a4d8",
+   		 "#60dbe8",
+   		 "#8bd346",
+    		"#efdf48",
+   		 "#f9a52c",
+    		"#d64e12"
+	]
+---------------------------
+
+	7.create rows & columns
+		const ROWS = 20;
+		const COLS = 10;
+----------------------------
+
+	8.create grid 
+		- grid is a pattern of horizontal and vertical lines that cross each 
+other to make a set of squares.
+
+		let grid = generateGrid();
+
+		function generateGrid(){
+    			let grid = [];
+    			
+			for(let i=0;i<ROWS;i++){
+        				grid.push([]);
+        			
+				for(let j=0;j<COLS;j++){
+           	 			grid[i].push(0)
+        				}
+    			}
+    		return grid;
+		}
+------------------------------
+
+	9.Initialise falling object to null
+		let fallingPieceObj = null;
+-----------------------
+
+	10.Initialise score to 0
+		let score = 0;
+------------------------------
+
+	11.set interval between falling objects to 500ms or 0.5s
+
+		myInterval = setInterval(function, milliseconds);
+The setInterval() method calls a function at specified intervals (in milliseconds).
+The setInterval() method continues calling the function until clearInterval() is 
+called, or the window is closed.		
+
+		setInterval(newGameState,500);
+        -----------------------
+		function newGameState(){
+    			checkGrid();
+    			
+			if(!fallingPieceObj){         //if falling obj = null/false/0
+        				fallingPieceObj = randomPieceObject();
+       				 renderPiece();
+    			}
+    			moveDown();
+		}
+
+        -----------------------
+	//to clear horizontal line/grid which is filled 
+	//then add new grid
+
+		function checkGrid(){
+    			let count = 0;
+    
+			for(let i=0;i<grid.length;i++){
+        				let allFilled = true;
+        
+				for(let j=0;j<grid[0].length;j++){
+            				if(grid[i][j] == 0){
+                				allFilled = false
+            				}
+        				}
+        			
+				if(allFilled){
+            				count++;
+            				grid.splice(i,1);
+            				grid.unshift([0,0,0,0,0,0,0,0,0,0]);
+        				}
+    			}
+
+			if(count == 1){
+        				score+=10;
+    			}else if(count == 2){
+        				score+=20;
+    			}else if(count == 3){
+        				score+=30;
+			}else if(count == 4){
+        				score+=40;
+			}else if(count == 5){
+        				score+=50;
+    			}else if(count>5){
+        				score+=100
+    			}
+    			scoreboard.innerHTML = "Score: " + score;
+		}
+
+---------------------------
+
+	12.create random object & render it
+		
+		function randomPieceObject(){
+    			let ran = Math.floor(Math.random()*7);
+    			let piece = SHAPES[ran];
+    			let colorIndex = ran+1;
+    			let x = 4;
+    			let y = 0;
+    			return {piece,colorIndex,x,y}
+		}
+
+		function renderPiece(){
+    			let piece = fallingPieceObj.piece;
+    
+			for(let i=0;i<piece.length;i++){
+        				for(let j=0;j<piece[i].length;j++){
+            				if(piece[i][j] == 1){
+           					 ctx.fillStyle = COLORS[fallingPieceObj.colorIndex];
+            					 ctx.fillRect(fallingPieceObj.x+j,fallingPieceObj.y+i,1,1);
+        					}
+        				}
+    			}
+		}
+
+	
+-------------------------
+	13. to press key(right / left/down /rotate) after falling object appears
+		document.addEventListener("keydown",function(e){
+    
+			let key = e.key;
+			if(key == "ArrowDown"){
+        				moveDown();
+    			}else if(key == "ArrowLeft"){
+        				moveLeft();
+    			}else if(key == "ArrowRight"){
+        				moveRight();
+    			}else if(key == "ArrowUp"){
+        				rotate();
+    			}
+		})
+
+	------------------
+		function moveDown(){
+    			if(!collision(fallingPieceObj.x,fallingPieceObj.y+1))
+        				fallingPieceObj.y += 1;
+    			else{
+        				let piece = fallingPieceObj.piece;
+        			
+				for(let i=0;i<piece.length;i++){
+            				for(let j=0;j<piece[i].length;j++){
+                				
+						if(piece[i][j] == 1){
+                    					let p = fallingPieceObj.x+j;
+                    					let q = fallingPieceObj.y+i;
+                    				
+							grid[q][p] = fallingPieceObj.colorIndex;
+                					}
+           			 	}
+        				}
+        
+				if(fallingPieceObj.y == 0){
+            				alert("game over");
+            				grid = generateGrid();
+            				score = 0;
+       			 	}
+        			
+				fallingPieceObj = null;
+    			}
+    			
+			renderGame();
+		}
+	---------------
+		function moveLeft(){
+    			if(!collision(fallingPieceObj.x-1,fallingPieceObj.y))
+        				fallingPieceObj.x-=1;
+    
+			renderGame();
+		}
+
+	-----------------------
+		function moveRight(){
+   		 	if(!collision(fallingPieceObj.x+1,fallingPieceObj.y))
+        				fallingPieceObj.x+=1;
+    			renderGame();
+		}
+	--------------------------
+
+		function rotate(){
+    			let rotatedPiece = [];
+    			let piece = fallingPieceObj.piece;
+    			
+			for(let i=0;i<piece.length;i++){
+       	 			rotatedPiece.push([]);
+        				
+				for(let j=0;j<piece[i].length;j++){
+            				rotatedPiece[i].push(0);
+        			}
+    		}
+    		
+			for(let i=0;i<piece.length;i++){
+        				for(let j=0;j<piece[i].length;j++){
+           				rotatedPiece[i][j] = piece[j][i]
+        				}
+    			}
+
+		for(let i=0;i<rotatedPiece.length;i++){
+       	 		rotatedPiece[i] = rotatedPiece[i].reverse();
+    		}
+    		
+		if(!collision(fallingPieceObj.x,fallingPieceObj.y,rotatedPiece))
+        			fallingPieceObj.piece = rotatedPiece;
+    		
+		renderGame()
+	}
+
+	--------------------
+
+		function collision(x,y,rotatedPiece){
+    			let piece = rotatedPiece || fallingPieceObj.piece
+    
+			for(let i=0;i<piece.length;i++){
+        				for(let j=0;j<piece[i].length;j++){
+            
+					if(piece[i][j] == 1){
+            					let p = x+j;
+            					let q = y+i;
+            			
+						if(p>=0 && p<COLS && q>=0 && q<ROWS){
+                						if(grid[q][p]>0){
+                    						return true;
+                						}
+            					}else{
+                						return true;
+            					}
+					}
+        				}
+    			}
+    			return false;
+		}
+
+	------------------------
+		
+		function renderGame(){
+    			for(let i=0;i<grid.length;i++){
+        				for(let j=0;j<grid[i].length;j++){
+            				ctx.fillStyle = COLORS[grid[i][j]];
+            				ctx.fillRect(j,i,1,1)
+        				}
+    			}
+    			renderPiece();
+		}
+
+	----------------------
+		
